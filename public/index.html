@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#373838">
+<title>End Plutocracy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Colors are taken straight from the logo */
+  :root {
+    --bg: #373838;          /* logo background */
+    --bg-deep: #2d2e2e;
+    --line: #555858;
+    --grey: #cbcbcb;       /* logo light grey */
+    --grey-dim: #a6a8a8;
+    --purple: #87539b;     /* logo purple */
+    --purple-text: #b88ccf;
+    --purple-pale: #d4b8e3;
+    --purple-dark: #5d3a70;
+    --purple-header: #6f4283; /* a shade deeper than the logo purple so the light grey text stays readable */
+    --display: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--grey);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  a { color: var(--purple-pale); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px; }
+  section { scroll-margin-top: 76px; }
+
+  /* Top bar */
+  .topbar { position: sticky; top: 0; z-index: 10; background: var(--purple-header); border-bottom: 3px solid var(--purple-dark); }
+  .topbar .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 24px; padding-top: 12px; padding-bottom: 12px; }
+  .wordmark { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
+  .wordmark b { color: inherit; font-weight: 800; }
+  .topbar nav { display: flex; gap: 20px; }
+  .topbar nav a { font-family: var(--display); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
+  .topbar nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; gap: 40px; align-items: center; padding: 40px 0 28px; }
+  .logo { display: block; width: 100%; max-width: 340px; height: auto; margin: 0 auto; }
+  .kicker { font-family: var(--display); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--purple-text); margin: 0 0 10px; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(1.6rem, 4.2vw, 2.8rem); line-height: 1.15; letter-spacing: 0.01em; text-transform: uppercase; margin: 0 0 14px; color: var(--grey); }
+  h1 em { font-style: normal; color: var(--purple-text); }
+  .hero-sub { margin: 0 0 20px; color: var(--grey-dim); max-width: 36rem; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { font-family: var(--display); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; border-radius: 999px; padding: 10px 22px; border: 2px solid var(--purple); background: var(--purple); color: #fff; }
+  .btn:hover { background: var(--purple-text); border-color: var(--purple-text); color: #232424; }
+  .btn.ghost { background: transparent; color: var(--purple-pale); }
+  .btn.ghost:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .status { font-size: 0.78rem; color: var(--grey-dim); margin: 16px 0 0; }
+  @media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 28px; }
+    .logo { max-width: 280px; }
+  }
+
+  /* Section titles */
+  h2 { font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 4px; color: var(--grey); }
+  h2::before {
+    content: ""; display: inline-block; width: 22px; height: 22px; margin-right: 10px; vertical-align: -3px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b88ccf' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M12 2 L21 12 H16 V22 H8 V12 H3 Z'/%3E%3C/svg%3E") no-repeat center / contain;
+  }
+  .sub { color: var(--grey-dim); font-size: 0.9rem; margin: 0 0 18px; }
+  .block { padding-top: 36px; }
+
+  /* Wealth gap */
+  .gap { border: 2px solid var(--purple); border-radius: 28px; padding: 26px 22px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat { border: 2px solid var(--purple); border-radius: 18px; padding: 14px 16px; }
+  .stat .k { font-family: var(--display); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-pale); }
+  .stat .v { font-family: var(--display); font-weight: 800; font-size: 2.2rem; line-height: 1.2; color: var(--grey); font-variant-numeric: tabular-nums; }
+  .stat .n { font-size: 0.78rem; color: var(--grey-dim); margin-top: 2px; }
+  .stat:last-child { background: var(--purple); }
+  .stat:last-child .k, .stat:last-child .n { color: #f1e6f8; }
+  .stat:last-child .v { color: #fff; }
+
+  .panel { background: var(--bg-deep); border: 2px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  .panel h3 { margin: 0 0 12px; font-family: var(--display); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); }
+
+  .barrow { margin-bottom: 14px; }
+  .barlabel { font-size: 0.78rem; color: var(--grey-dim); margin-bottom: 4px; }
+  .bar { display: flex; gap: 3px; height: 40px; }
+  .seg { display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 0.78rem; font-weight: 700; min-width: 3px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .c-top1 { background: #b88ccf; color: #232424; }
+  .c-next9 { background: #87539b; color: #fff; }
+  .c-next40 { background: #5d3a70; color: #fff; }
+  .c-bottom50 { background: #cbcbcb; color: #232424; }
+
+  table.legend { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 6px; }
+  table.legend th, table.legend td { text-align: right; padding: 7px 6px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  table.legend th:first-child, table.legend td:first-child { text-align: left; }
+  table.legend th { color: var(--grey-dim); font-weight: 600; font-size: 0.75rem; border-top: 0; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 8px; vertical-align: -1px; }
+
+  .key { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; margin-bottom: 8px; }
+  .key i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 6px; vertical-align: 3px; }
+  #trend { width: 100%; }
+  #trend text { font-family: inherit; }
+  .caption { font-size: 0.85rem; color: var(--grey-dim); margin: 8px 0 0; }
+  .source { font-size: 0.78rem; color: var(--grey-dim); margin: 8px 0 0; }
+
+  /* Indicators */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .card { display: block; border: 2px solid var(--line); border-radius: 18px; padding: 16px; text-decoration: none; color: inherit; }
+  .card:hover { border-color: var(--purple); }
+  .label { color: var(--grey-dim); font-size: 0.85rem; }
+  .value { font-family: var(--display); font-size: 2rem; font-weight: 800; margin: 2px 0; font-variant-numeric: tabular-nums; color: var(--grey); }
+  .meta { font-size: 0.8rem; color: var(--grey-dim); display: flex; justify-content: space-between; gap: 8px; }
+  .up { color: var(--purple-text); font-weight: 700; } .down { color: var(--grey-dim); font-weight: 700; }
+  svg.spark { width: 100%; height: 56px; margin-top: 8px; display: block; }
+
+  /* News */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { font-family: var(--display); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.04em; border: 2px solid var(--purple); background: transparent; color: var(--purple-pale); border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+  .chip:hover { background: var(--purple-dark); }
+  .chip[aria-pressed="true"] { background: var(--purple); color: #fff; }
+  ul.news { list-style: none; padding: 0; margin: 0; border: 2px solid var(--line); border-radius: 18px; overflow: hidden; }
+  ul.news li { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  ul.news li:last-child { border-bottom: 0; }
+  ul.news a { color: var(--grey); text-decoration: none; font-weight: 600; }
+  ul.news a:hover { color: var(--purple-pale); text-decoration: underline; }
+  .src { font-size: 0.78rem; color: var(--grey-dim); margin-top: 2px; }
+  .summary { font-size: 0.88rem; color: var(--grey-dim); margin-top: 4px; }
+  .notice { color: var(--grey-dim); padding: 14px 18px; }
+
+  /* Merch */
+  .merch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .product { border: 2px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
+  .product:hover { border-color: var(--purple); }
+  .product .art { background: var(--bg-deep); padding: 14px; }
+  .product .art svg { display: block; width: 100%; height: auto; max-height: 220px; }
+  .product .info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .product h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey); }
+  .product p { margin: 0; font-size: 0.88rem; color: var(--grey-dim); flex: 1; }
+  .product .price { font-family: var(--display); font-weight: 700; color: var(--purple-pale); }
+  .product .btn, .product .soon { align-self: flex-start; margin-top: 6px; }
+  .soon { font-family: var(--display); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; border: 2px dashed var(--purple); color: var(--purple-pale); border-radius: 999px; padding: 8px 18px; }
+
+  footer { margin: 44px 0 56px; padding-top: 24px; border-top: 2px solid var(--purple); text-align: center; }
+  .badge { display: inline-block; border: 2px solid var(--purple); padding: 5px 16px; font-family: var(--display); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--grey); }
+  footer p { font-size: 0.8rem; color: var(--grey-dim); max-width: 44rem; margin: 14px auto 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="wordmark" href="#top">End <b>Plutocracy</b></a>
+    <nav aria-label="Sections">
+      <a href="#wealth">Wealth gap</a>
+      <a href="#indicators">Indicators</a>
+      <a href="#headlines">Headlines</a>
+      <a href="#merch">Merch</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <section class="hero" aria-labelledby="hero-title">
+    <img class="logo" src="/logo.png" width="804" height="1022"
+         alt="End the Plutocracy logo: a worried face inside a circle, flanked by two upward arrows">
+    <div>
+      <p class="kicker">The wealth gap, by the numbers</p>
+      <h1 id="hero-title">The gap between classes of wealth</h1>
+      <p class="hero-sub" id="hero-sub">Loading the latest Federal Reserve data…</p>
+      <div class="cta">
+        <a class="btn" href="#wealth">See the data</a>
+        <a class="btn ghost" href="#headlines">Read the news</a>
+      </div>
+      <p class="status" id="status">Loading…</p>
+    </div>
+  </section>
+
+  <section class="block" id="wealth" aria-labelledby="wealth-h">
+    <h2 id="wealth-h">The wealth gap</h2>
+    <p class="sub">How U.S. household net worth is divided between wealth classes</p>
+    <div class="gap" id="wealth-body"><p class="notice">Loading wealth data…</p></div>
+  </section>
+
+  <section class="block" id="indicators" aria-labelledby="ind-h">
+    <h2 id="ind-h">Economic indicators</h2>
+    <p class="sub">Key measures from the Federal Reserve Economic Data (FRED) service</p>
+    <div class="grid" id="indicators-grid"></div>
+  </section>
+
+  <section class="block" id="headlines" aria-labelledby="news-h">
+    <h2 id="news-h">Latest headlines</h2>
+    <p class="sub">Inequality and economy news from linked publishers</p>
+    <div class="chips" id="chips"></div>
+    <ul class="news" id="news"></ul>
+  </section>
+
+  <section class="block" id="merch" aria-labelledby="merch-h">
+    <h2 id="merch-h">Merch</h2>
+    <p class="sub">Wear it, stick it, hang it</p>
+    <div class="merch-grid" id="merch-grid"></div>
+  </section>
+
+  <footer>
+    <span class="badge">endplutocracy.rip</span>
+    <p>
+      Wealth shares: Federal Reserve Distributional Financial Accounts, via FRED (quarterly, covers households
+      and nonprofits). Indicators: FRED. Headlines link to their original publishers.
+      Figures are published on each source's own schedule.
+    </p>
+  </footer>
+</main>
+
+<script>
+const REFRESH_MS = 5 * 60 * 1000;
+let data = null;
+let activeSource = 'All';
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = (u) => (/^https?:\/\//i.test(u) ? u : '#');
+const fmt = (n, d = 1) => Number(n).toFixed(d);
+
+const COLORS = { top1: '#b88ccf', next9: '#87539b', next40: '#5d3a70', bottom50: '#cbcbcb' };
+
+function quarterLabel(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return 'Q' + (Math.floor(d.getUTCMonth() / 3) + 1) + ' ' + d.getUTCFullYear();
+}
+const yearOf = (iso) => iso.slice(0, 4);
+
+function changeWords(share, first, firstDate) {
+  const word = share > first ? 'Up from' : share < first ? 'Down from' : 'Unchanged from';
+  return `${word} ${fmt(first)}% in ${yearOf(firstDate)}`;
+}
+
+/* ---------- Wealth gap ---------- */
+
+function stackedBar(label, values) {
+  const segs = values.map((v) =>
+    `<div class="seg c-${v.key}" style="width:${v.pct}%" title="${esc(v.name)}: ${fmt(v.pct)}%">${v.pct >= 7 ? fmt(v.pct, v.pct % 1 ? 1 : 0) + '%' : ''}</div>`).join('');
+  return `<div class="barrow"><div class="barlabel">${esc(label)}</div><div class="bar" role="img" aria-label="${esc(label)}: ${values.map((v) => v.name + ' ' + fmt(v.pct) + '%').join(', ')}">${segs}</div></div>`;
+}
+
+function renderWealth() {
+  const w = data.wealth;
+  const body = $('wealth-body');
+  if (!w) {
+    body.innerHTML = '<p class="notice">Wealth data is not available yet. The server may still be fetching it; this page will retry shortly.</p>';
+    return;
+  }
+  const g = Object.fromEntries(w.groups.map((x) => [x.key, x]));
+  const top1 = g.top1, bottom = g.bottom50;
+
+  // Hero statement
+  $('hero-title').innerHTML = `The top 1% holds <em>${fmt(top1.share)}%</em> of U.S. household wealth. The bottom half holds <em>${fmt(bottom.share)}%</em>.`;
+  $('hero-sub').textContent = `That is about ${fmt(w.ratio)} times as much, as of ${quarterLabel(w.asOf)}, according to Federal Reserve data.`;
+
+  const stats = `
+    <div class="stats">
+      <div class="stat"><div class="k">Top 1% share of wealth</div><div class="v">${fmt(top1.share)}%</div><div class="n">${changeWords(top1.share, top1.firstShare, top1.firstDate)}</div></div>
+      <div class="stat"><div class="k">Top 0.1% share of wealth</div><div class="v">${fmt(w.top01.share)}%</div><div class="n">${changeWords(w.top01.share, w.top01.firstShare, w.top01.firstDate)}</div></div>
+      <div class="stat"><div class="k">Bottom 50% share of wealth</div><div class="v">${fmt(bottom.share)}%</div><div class="n">${changeWords(bottom.share, bottom.firstShare, bottom.firstDate)}</div></div>
+      <div class="stat"><div class="k">Top 1% vs. bottom 50%</div><div class="v">${fmt(w.ratio)}×</div><div class="n">$${fmt(w.top1Trillions)} trillion vs. $${fmt(w.bottom50Trillions)} trillion</div></div>
+    </div>`;
+
+  const householdBar = stackedBar('Share of households', w.groups.map((x) => ({ key: x.key, name: x.label, pct: x.households })));
+  const wealthBar = stackedBar('Share of net worth', w.groups.map((x) => ({ key: x.key, name: x.label, pct: x.share })));
+
+  const rows = w.groups.map((x) => `
+    <tr><td><span class="sw" style="background:${COLORS[x.key]}"></span>${esc(x.label)}</td>
+        <td>${x.households}%</td><td>${fmt(x.share)}%</td></tr>`).join('');
+
+  body.innerHTML = `
+    ${stats}
+    <div class="panel">
+      <h3>Population versus wealth</h3>
+      ${householdBar}${wealthBar}
+      <table class="legend">
+        <thead><tr><th>Wealth class</th><th>Of households</th><th>Of net worth</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Share of net worth over time</h3>
+      <div class="key">
+        <span><i style="background:${COLORS.top1}"></i>Top 1%: ${fmt(top1.share)}% now, ${fmt(top1.firstShare)}% in ${yearOf(top1.firstDate)}</span>
+        <span><i style="background:${COLORS.bottom50}"></i>Bottom 50%: ${fmt(bottom.share)}% now, ${fmt(bottom.firstShare)}% in ${yearOf(bottom.firstDate)}</span>
+      </div>
+      <div id="trend"></div>
+      <p class="caption">Each line shows the percent of total U.S. household net worth held by that group, by quarter.</p>
+    </div>
+    <p class="source">Source: <a href="${esc(safeUrl(w.link))}" target="_blank" rel="noopener">Federal Reserve Distributional Financial Accounts via FRED</a>. Latest quarter: ${esc(quarterLabel(w.asOf))}.</p>`;
+
+  renderTrend();
+}
+
+function renderTrend() {
+  const el = $('trend');
+  if (!el || !data || !data.wealth) return;
+  const { top1, bottom50 } = data.wealth.trend;
+  const W = Math.max(280, el.clientWidth || 600), H = 280;
+  const m = { l: 40, r: 14, t: 12, b: 26 };
+  const times = top1.map((p) => Date.parse(p.date));
+  const t0 = times[0], t1 = times[times.length - 1];
+  const maxV = Math.max(...top1.map((p) => p.value), ...bottom50.map((p) => p.value));
+  const yMax = Math.ceil((maxV + 1) / 10) * 10;
+  const x = (t) => m.l + ((t - t0) / (t1 - t0)) * (W - m.l - m.r);
+  const y = (v) => H - m.b - (v / yMax) * (H - m.t - m.b);
+  const path = (s) => s.map((p, i) => (i ? 'L' : 'M') + x(Date.parse(p.date)).toFixed(1) + ' ' + y(p.value).toFixed(1)).join(' ');
+
+  let grid = '';
+  for (let v = 0; v <= yMax; v += 10) {
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="#4a4c4c"/>
+             <text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#a6a8a8">${v}%</text>`;
+  }
+  let ticks = '';
+  const startYear = new Date(t0).getUTCFullYear(), endYear = new Date(t1).getUTCFullYear();
+  const step = (endYear - startYear) > 25 ? 10 : 5;
+  for (let yr = Math.ceil(startYear / step) * step; yr <= endYear; yr += step) {
+    const px = x(Date.UTC(yr, 0, 1));
+    if (px < m.l || px > W - m.r) continue;
+    ticks += `<text x="${px}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#a6a8a8">${yr}</text>`;
+  }
+  const lastT = top1[top1.length - 1], lastB = bottom50[bottom50.length - 1];
+  const dot = (p, c) => `<circle cx="${x(Date.parse(p.date))}" cy="${y(p.value)}" r="4.5" fill="${c}"/>`;
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img"
+      aria-label="Line chart: top 1% share of net worth went from ${fmt(top1[0].value)}% to ${fmt(lastT.value)}%; bottom 50% share went from ${fmt(bottom50[0].value)}% to ${fmt(lastB.value)}%.">
+    ${grid}${ticks}
+    <path d="${path(bottom50)}" fill="none" stroke="${COLORS.bottom50}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="${path(top1)}" fill="none" stroke="${COLORS.top1}" stroke-width="3.5" stroke-linejoin="round"/>
+    ${dot(lastT, COLORS.top1)}${dot(lastB, COLORS.bottom50)}
+  </svg>`;
+}
+
+/* ---------- Indicators ---------- */
+
+function sparkline(points) {
+  if (points.length < 2) return '';
+  const w = 300, h = 56, pad = 4;
+  const vals = points.map((p) => p.value);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const span = max - min || 1;
+  const coords = vals.map((v, i) => [
+    pad + (i / (vals.length - 1)) * (w - pad * 2),
+    h - pad - ((v - min) / span) * (h - pad * 2),
+  ]);
+  const d = coords.map((c, i) => (i ? 'L' : 'M') + c[0].toFixed(1) + ' ' + c[1].toFixed(1)).join(' ');
+  const last = coords[coords.length - 1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${d}" fill="none" stroke="#b88ccf" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="#b88ccf"/></svg>`;
+}
+
+function renderIndicators() {
+  const el = $('indicators-grid');
+  if (!data.indicators.length) {
+    el.innerHTML = '<p class="notice">Indicators are not available yet. The server may still be fetching data; this page will retry shortly.</p>';
+    return;
+  }
+  el.innerHTML = data.indicators.map((i) => {
+    const dir = i.change > 0 ? 'up' : i.change < 0 ? 'down' : '';
+    const arrow = i.change > 0 ? '▲' : i.change < 0 ? '▼' : '–';
+    const sign = i.change > 0 ? '+' : '';
+    return `<a class="card" href="${esc(safeUrl(i.link))}" target="_blank" rel="noopener">
+      <div class="label">${esc(i.label)}</div>
+      <div class="value">${i.latest.toFixed(2)}<span class="label"> ${esc(i.unit)}</span></div>
+      <div class="meta">
+        <span class="${dir}">${arrow} ${sign}${i.change.toFixed(2)} vs prior</span>
+        <span>as of ${esc(i.date)}</span>
+      </div>
+      ${sparkline(i.history)}
+    </a>`;
+  }).join('');
+}
+
+/* ---------- News ---------- */
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const hrs = Math.round(mins / 60);
+  if (hrs < 48) return hrs + ' hr ago';
+  return new Date(iso).toLocaleDateString();
+}
+
+function renderNews() {
+  const sources = ['All', ...new Set(data.news.map((n) => n.source))];
+  $('chips').innerHTML = sources.map((s) =>
+    `<button class="chip" aria-pressed="${s === activeSource}" data-src="${esc(s)}">${esc(s)}</button>`).join('');
+  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+    activeSource = b.dataset.src;
+    renderNews();
+  }));
+
+  const items = data.news.filter((n) => activeSource === 'All' || n.source === activeSource);
+  $('news').innerHTML = items.length
+    ? items.map((n) => `<li>
+        <a href="${esc(safeUrl(n.link))}" target="_blank" rel="noopener">${esc(n.title)}</a>
+        <div class="src">${esc(n.publisher || n.source)}${n.date ? ' · ' + timeAgo(n.date) : ''}</div>
+        ${n.summary ? `<div class="summary">${esc(n.summary)}</div>` : ''}
+      </li>`).join('')
+    : '<li class="notice">No headlines available right now.</li>';
+}
+
+/* ---------- Merch ---------- */
+
+// Outline mockups of each item, each with the logo placed on it.
+const MERCH_STYLE = 'fill="#373838" stroke="#87539b" stroke-width="3" stroke-linejoin="round"';
+const MERCH_ART = {
+  tee:     { shape: `<path ${MERCH_STYLE} d="M60 30 L20 55 L35 85 L55 75 V170 H145 V75 L165 85 L180 55 L140 30 Q100 58 60 30 Z"/>`, logo: [72, 84, 56, 71] },
+  tote:    { shape: `<path fill="none" stroke="#87539b" stroke-width="3" stroke-linecap="round" d="M76 72 V52 Q76 30 100 30 Q124 30 124 52 V72"/><rect ${MERCH_STYLE} x="45" y="70" width="110" height="108" rx="4"/>`, logo: [69, 84, 62, 79] },
+  sticker: { shape: `<circle ${MERCH_STYLE} cx="100" cy="100" r="80"/>`, logo: [55, 43, 90, 114] },
+  poster:  { shape: `<rect ${MERCH_STYLE} x="48" y="18" width="104" height="164" rx="3"/>`, logo: [60, 45, 80, 102] },
+};
+
+function merchArt(kind, name) {
+  const a = MERCH_ART[kind] || MERCH_ART.sticker;
+  const [x, y, w, h] = a.logo;
+  return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(name)} mockup with the End the Plutocracy logo">
+    ${a.shape}<image href="/logo.png" x="${x}" y="${y}" width="${w}" height="${h}"/></svg>`;
+}
+
+function renderMerch() {
+  const items = data.merch || [];
+  $('merch-grid').innerHTML = items.length
+    ? items.map((m) => `<article class="product">
+        <div class="art">${merchArt(m.kind, m.name)}</div>
+        <div class="info">
+          <h3>${esc(m.name)}</h3>
+          <p>${esc(m.description || '')}</p>
+          ${m.price ? `<div class="price">${esc(m.price)}</div>` : ''}
+          ${m.url ? `<a class="btn" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener">Shop</a>` : '<span class="soon">Coming soon</span>'}
+        </div>
+      </article>`).join('')
+    : '<p class="notice">Merch is coming soon.</p>';
+}
+
+/* ---------- Loading ---------- */
+
+async function load() {
+  try {
+    const res = await fetch('/api/data', { cache: 'no-store' });
+    data = await res.json();
+    renderWealth();
+    renderIndicators();
+    renderNews();
+    renderMerch();
+    $('status').textContent = data.updatedAt
+      ? 'Updated ' + new Date(data.updatedAt).toLocaleString()
+      : 'Waiting for first data refresh…';
+  } catch (e) {
+    $('status').textContent = 'Could not reach the server. Retrying…';
+  }
+}
+
+load();
+setInterval(load, REFRESH_MS);
+// Retry sooner while the server is still doing its first fetch
+const early = setInterval(() => { if (data && data.updatedAt) clearInterval(early); else load(); }, 5000);
+
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderTrend, 150); });
+</script>
+</body>
+</html>
