@@ -40,6 +40,8 @@
   .wordmark b { color: inherit; font-weight: 800; }
   .topbar nav { display: flex; gap: 20px; }
   .topbar nav a { font-family: var(--display); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
+  .topbar nav a { white-space: nowrap; }
+  @media (max-width: 520px) { .topbar nav { gap: 14px; } .topbar nav a { font-size: 0.72rem; letter-spacing: 0.03em; } }
   .topbar nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
 
   /* Hero */
@@ -130,17 +132,26 @@
   .notice { color: var(--grey-dim); padding: 14px 18px; }
 
   /* Merch */
-  .merch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .product { border: 2px solid var(--line); border-radius: 22px; overflow: hidden; display: flex; flex-direction: column; }
-  .product:hover { border-color: var(--purple); }
-  .product .art { background: var(--bg-deep); padding: 14px; }
-  .product .art svg { display: block; width: 100%; height: auto; max-height: 220px; }
-  .product .info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .product h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey); }
-  .product p { margin: 0; font-size: 0.88rem; color: var(--grey-dim); flex: 1; }
-  .product .price { font-family: var(--display); font-weight: 700; color: var(--purple-pale); }
-  .product .btn, .product .soon { align-self: flex-start; margin-top: 6px; }
-  .soon { font-family: var(--display); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; border: 2px dashed var(--purple); color: var(--purple-pale); border-radius: 999px; padding: 8px 18px; }
+  .banner { border: 2px solid var(--purple); background: var(--purple-dark); color: #fff; border-radius: 16px; padding: 12px 18px; margin-bottom: 16px; font-weight: 600; }
+  .shop { display: grid; grid-template-columns: minmax(200px, 320px) 1fr; gap: 28px; align-items: center; border: 2px solid var(--purple); border-radius: 28px; padding: 24px; }
+  .shop .art { background: var(--bg-deep); border-radius: 18px; padding: 16px; }
+  .shop .art { display: flex; align-items: center; justify-content: center; }
+  .shop .art .sticker-img { display: block; width: 100%; max-width: 250px; height: auto; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45)); }
+  .shop h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey); }
+  .shop .price { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1.2; color: var(--purple-pale); margin: 6px 0 0; }
+  .shop .ship { font-size: 0.8rem; color: var(--grey-dim); }
+  .shop .desc { color: var(--grey-dim); margin: 10px 0 18px; }
+  .buyrow { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .qty { display: inline-flex; align-items: center; border: 2px solid var(--purple); border-radius: 999px; }
+  .qty button { background: none; border: 0; color: var(--purple-pale); font: 700 1.25rem var(--display); width: 42px; height: 42px; cursor: pointer; }
+  .qty button:hover { color: #fff; }
+  .qty button:disabled { color: var(--line); cursor: default; }
+  .qty output { min-width: 30px; text-align: center; font-family: var(--display); font-weight: 700; color: var(--grey); }
+  button.btn { cursor: pointer; }
+  button.btn:disabled { opacity: 0.6; cursor: default; }
+  .checkout-msg { min-height: 1.3em; margin: 10px 0 0; font-size: 0.88rem; color: #f2b8b8; }
+  .checkout-note { margin: 4px 0 0; font-size: 0.78rem; color: var(--grey-dim); }
+  @media (max-width: 700px) { .shop { grid-template-columns: 1fr; padding: 18px; } .shop .art { max-width: 280px; margin: 0 auto; } }
 
   footer { margin: 44px 0 56px; padding-top: 24px; border-top: 2px solid var(--purple); text-align: center; }
   .badge { display: inline-block; border: 2px solid var(--purple); padding: 5px 16px; font-family: var(--display); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--grey); }
@@ -199,8 +210,9 @@
 
   <section class="block" id="merch" aria-labelledby="merch-h">
     <h2 id="merch-h">Merch</h2>
-    <p class="sub">Wear it, stick it, hang it</p>
-    <div class="merch-grid" id="merch-grid"></div>
+    <p class="sub">Spread the message</p>
+    <div id="merch-banner"></div>
+    <div id="merch-grid"></div>
   </section>
 
   <footer>
@@ -408,37 +420,84 @@ function renderNews() {
     : '<li class="notice">No headlines available right now.</li>';
 }
 
-/* ---------- Merch ---------- */
+/* ---------- Merch + checkout ---------- */
 
-// Outline mockups of each item, each with the logo placed on it.
-const MERCH_STYLE = 'fill="#373838" stroke="#87539b" stroke-width="3" stroke-linejoin="round"';
-const MERCH_ART = {
-  tee:     { shape: `<path ${MERCH_STYLE} d="M60 30 L20 55 L35 85 L55 75 V170 H145 V75 L165 85 L180 55 L140 30 Q100 58 60 30 Z"/>`, logo: [72, 84, 56, 71] },
-  tote:    { shape: `<path fill="none" stroke="#87539b" stroke-width="3" stroke-linecap="round" d="M76 72 V52 Q76 30 100 30 Q124 30 124 52 V72"/><rect ${MERCH_STYLE} x="45" y="70" width="110" height="108" rx="4"/>`, logo: [69, 84, 62, 79] },
-  sticker: { shape: `<circle ${MERCH_STYLE} cx="100" cy="100" r="80"/>`, logo: [55, 43, 90, 114] },
-  poster:  { shape: `<rect ${MERCH_STYLE} x="48" y="18" width="104" height="164" rx="3"/>`, logo: [60, 45, 80, 102] },
-};
+const money = (cents) => '$' + (cents / 100).toFixed(cents % 100 ? 2 : 0);
+let merchQty = 1;
+let merchRendered = false;
 
-function merchArt(kind, name) {
-  const a = MERCH_ART[kind] || MERCH_ART.sticker;
-  const [x, y, w, h] = a.logo;
-  return `<svg viewBox="0 0 200 200" role="img" aria-label="${esc(name)} mockup with the End the Plutocracy logo">
-    ${a.shape}<image href="/logo.png" x="${x}" y="${y}" width="${w}" height="${h}"/></svg>`;
+function stickerArt(name) {
+  return `<img class="sticker-img" src="/sticker.svg" width="202" height="279" alt="${esc(name)}: the End the Plutocracy logo in purple with an X-eyed face">`;
+}
+
+function renderBanner() {
+  const status = new URLSearchParams(location.search).get('checkout');
+  const el = $('merch-banner');
+  if (status === 'success') el.innerHTML = '<div class="banner" role="status">Thank you! Your order went through.</div>';
+  else if (status === 'cancelled') el.innerHTML = '<div class="banner" role="status">Checkout cancelled. You have not been charged.</div>';
 }
 
 function renderMerch() {
-  const items = data.merch || [];
-  $('merch-grid').innerHTML = items.length
-    ? items.map((m) => `<article class="product">
-        <div class="art">${merchArt(m.kind, m.name)}</div>
-        <div class="info">
-          <h3>${esc(m.name)}</h3>
-          <p>${esc(m.description || '')}</p>
-          ${m.price ? `<div class="price">${esc(m.price)}</div>` : ''}
-          ${m.url ? `<a class="btn" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener">Shop</a>` : '<span class="soon">Coming soon</span>'}
+  if (merchRendered) return; // render once so a refresh never resets the quantity or interrupts a checkout
+  const m = (data.merch || [])[0];
+  const box = $('merch-grid');
+  if (!m) { box.innerHTML = '<p class="notice">Merch is coming soon.</p>'; return; }
+  merchRendered = true;
+  renderBanner();
+
+  const ship = data.shippingCents > 0 ? '+ ' + money(data.shippingCents) + ' shipping per order' : 'Shipping included';
+  box.innerHTML = `<article class="shop">
+      <div class="art">${stickerArt(m.name)}</div>
+      <div>
+        <h3>${esc(m.name)}</h3>
+        <div class="price">${money(m.priceCents)}</div>
+        <div class="ship">${esc(ship)}</div>
+        <p class="desc">${esc(m.description || '')}</p>
+        <div class="buyrow">
+          <div class="qty" role="group" aria-label="Quantity">
+            <button type="button" id="qty-minus" aria-label="Fewer">&minus;</button>
+            <output id="qty-out" aria-live="polite">1</output>
+            <button type="button" id="qty-plus" aria-label="More">+</button>
+          </div>
+          <button type="button" class="btn" id="buy-btn"></button>
         </div>
-      </article>`).join('')
-    : '<p class="notice">Merch is coming soon.</p>';
+        <p class="checkout-msg" id="checkout-msg" role="alert"></p>
+        <p class="checkout-note">Secure checkout by Stripe. You enter your shipping address and card details on Stripe's page; this site never sees your card number.</p>
+      </div>
+    </article>`;
+
+  const MAX_Q = 20;
+  const buy = $('buy-btn');
+  const paint = () => {
+    $('qty-out').textContent = merchQty;
+    $('qty-minus').disabled = merchQty <= 1;
+    $('qty-plus').disabled = merchQty >= MAX_Q;
+    buy.textContent = 'Buy now · ' + money(m.priceCents * merchQty);
+  };
+  paint();
+  $('qty-minus').addEventListener('click', () => { if (merchQty > 1) { merchQty--; paint(); } });
+  $('qty-plus').addEventListener('click', () => { if (merchQty < MAX_Q) { merchQty++; paint(); } });
+
+  buy.addEventListener('click', async () => {
+    const msg = $('checkout-msg');
+    msg.textContent = '';
+    buy.disabled = true;
+    buy.textContent = 'Taking you to checkout…';
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: m.id, quantity: merchQty }),
+      });
+      const out = await res.json().catch(() => ({}));
+      if (res.ok && out.url) { window.location.assign(out.url); return; }
+      msg.textContent = out.error || 'Something went wrong. Please try again.';
+    } catch (e) {
+      msg.textContent = 'Could not reach the server. Please try again.';
+    }
+    buy.disabled = false;
+    paint();
+  });
 }
 
 /* ---------- Loading ---------- */

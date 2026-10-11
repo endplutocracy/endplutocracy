@@ -53,7 +53,7 @@ const FEEDS = [
 // The shop sells one item. Prices are in cents and are ALWAYS taken from here on the
 // server, never from the browser, so a visitor cannot change what they pay.
 const MERCH = [
-  { id: 'sticker', name: 'End Plutocracy sticker', description: 'The logo, for laptops, bottles and lamp posts.', priceCents: 300 },
+  { id: 'sticker', name: 'End Plutocracy sticker', description: 'The logo, for laptops, bottles and lamp posts.', priceCents: 400 },
 ];
 
 // Checkout runs on Stripe's hosted payment page. Set these as environment variables:
