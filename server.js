@@ -48,16 +48,25 @@ const FEEDS = [
   { name: 'BBC Business',    url: 'https://feeds.bbci.co.uk/news/business/rss.xml' },
 ];
 
-// Merch shown in the Merch section. Each card shows a mockup of the logo on the item.
-// kind: 'tee', 'tote', 'sticker' or 'poster'.
-// Leave `url` empty and the card says "Coming soon". Add your shop link in `url`
-// (and optionally a `price` such as '$25') and the card becomes a "Shop" button.
+// ---------- Merch + checkout settings ----------
+
+// The shop sells one item. Prices are in cents and are ALWAYS taken from here on the
+// server, never from the browser, so a visitor cannot change what they pay.
 const MERCH = [
-  { id: 'tee',     kind: 'tee',     name: 'Logo tee',   description: 'The logo on a classic tee.',      price: '', url: '' },
-  { id: 'tote',    kind: 'tote',    name: 'Tote bag',   description: 'Carry the message with you.',     price: '', url: '' },
-  { id: 'sticker', kind: 'sticker', name: 'Sticker',    description: 'For laptops, bottles and lamp posts.', price: '', url: '' },
-  { id: 'poster',  kind: 'poster',  name: 'Poster',     description: 'The logo, big, for any wall.',    price: '', url: '' },
+  { id: 'sticker', name: 'End Plutocracy sticker', description: 'The logo, for laptops, bottles and lamp posts.', priceCents: 300 },
 ];
+
+// Checkout runs on Stripe's hosted payment page. Set these as environment variables:
+//   STRIPE_SECRET_KEY  your Stripe secret key (sk_live_... or sk_test_...). Required.
+//   SITE_URL           your public address, e.g. https://endplutocracy.rip (needed once it is online)
+//   SHIPPING_CENTS     flat shipping charged per order, in cents. Default 0 (free shipping).
+//   SHIP_COUNTRIES     comma-separated country codes you ship to. Default US.
+const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || '';
+const STRIPE_API = (process.env.STRIPE_API_BASE || 'https://api.stripe.com').replace(/\/$/, '');
+const SITE_URL = (process.env.SITE_URL || '').replace(/\/$/, '');
+const SHIPPING_CENTS = Math.max(0, Math.round(Number(process.env.SHIPPING_CENTS) || 0));
+const SHIP_COUNTRIES = (process.env.SHIP_COUNTRIES || 'US').split(',').map((c) => c.trim().toUpperCase()).filter(Boolean);
+const MAX_QUANTITY = 20;
 
 const MAX_NEWS_ITEMS = 50;
 const HISTORY_POINTS = 60;
@@ -209,7 +218,7 @@ async function loadWealth() {
 
 // ---------- Cache + scheduled refresh ----------
 
-const cache = { updatedAt: null, wealth: null, indicators: [], news: [], merch: MERCH, errors: [] };
+const cache = { updatedAt: null, wealth: null, indicators: [], news: [], merch: MERCH, shippingCents: SHIPPING_CENTS, errors: [] };
 
 async function refresh() {
   const errors = [];
@@ -257,6 +266,108 @@ async function refresh() {
   errors.forEach((e) => console.warn('  ! ' + e));
 }
 
+// ---------- Checkout (Stripe hosted payment page) ----------
+
+function sendJson(res, status, body) {
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(body));
+}
+
+function readJson(req, limit = 2048) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    let tooBig = false;
+    req.on('data', (c) => {
+      if (tooBig) return; // stop collecting; the handler replies 413 and closes the connection
+      size += c.length;
+      if (size > limit) {
+        tooBig = true;
+        chunks.length = 0;
+        const err = new Error('Request too large');
+        err.code = 'TOO_LARGE';
+        reject(err);
+        return;
+      }
+      chunks.push(c);
+    });
+    req.on('end', () => {
+      if (tooBig) return;
+      try { resolve(JSON.parse(Buffer.concat(chunks).toString() || '{}')); }
+      catch { reject(new Error('Invalid JSON')); }
+    });
+    req.on('error', reject);
+  });
+}
+
+async function createCheckoutSession(item, quantity, origin) {
+  const p = new URLSearchParams();
+  p.set('mode', 'payment');
+  p.set('success_url', origin + '/?checkout=success#merch');
+  p.set('cancel_url', origin + '/?checkout=cancelled#merch');
+  p.set('line_items[0][quantity]', String(quantity));
+  p.set('line_items[0][price_data][currency]', 'usd');
+  p.set('line_items[0][price_data][unit_amount]', String(item.priceCents));
+  p.set('line_items[0][price_data][product_data][name]', item.name);
+  if (item.description) p.set('line_items[0][price_data][product_data][description]', item.description);
+  p.set('metadata[item_id]', item.id);
+  SHIP_COUNTRIES.forEach((c, i) => p.set(`shipping_address_collection[allowed_countries][${i}]`, c));
+  if (SHIPPING_CENTS > 0) {
+    p.set('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
+    p.set('shipping_options[0][shipping_rate_data][display_name]', 'Standard shipping');
+    p.set('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(SHIPPING_CENTS));
+    p.set('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'usd');
+  }
+
+  const res = await fetch(STRIPE_API + '/v1/checkout/sessions', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + STRIPE_KEY, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: p,
+    signal: AbortSignal.timeout(15000),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.url) {
+    throw new Error((json.error && json.error.message) || `Stripe returned HTTP ${res.status}`);
+  }
+  return json.url;
+}
+
+async function handleCheckout(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return sendJson(res, 405, { error: 'Use POST.' });
+  }
+  if (!STRIPE_KEY) {
+    return sendJson(res, 503, { error: 'Checkout is not set up yet. Please check back soon.' });
+  }
+  let body;
+  try { body = await readJson(req); }
+  catch (e) {
+    if (e.code === 'TOO_LARGE') {
+      res.setHeader('Connection', 'close');
+      res.on('finish', () => req.destroy());
+      return sendJson(res, 413, { error: 'Request too large.' });
+    }
+    return sendJson(res, 400, { error: 'Bad request.' });
+  }
+
+  const item = MERCH.find((m) => m.id === body.id);
+  const quantity = Number(body.quantity);
+  if (!item) return sendJson(res, 400, { error: 'Unknown item.' });
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
+    return sendJson(res, 400, { error: `Quantity must be a whole number from 1 to ${MAX_QUANTITY}.` });
+  }
+
+  try {
+    const origin = SITE_URL || `http://${req.headers.host}`;
+    const url = await createCheckoutSession(item, quantity, origin);
+    sendJson(res, 200, { url });
+  } catch (e) {
+    console.error('Checkout error:', e.message);
+    sendJson(res, 502, { error: 'We could not start checkout. Please try again in a moment.' });
+  }
+}
+
 // ---------- HTTP server ----------
 
 const MIME = {
@@ -280,6 +391,8 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify(cache));
   }
 
+  if (url.pathname === '/api/checkout') return handleCheckout(req, res);
+
   const rel = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (!file.startsWith(PUBLIC_DIR)) {
@@ -299,6 +412,7 @@ const server = http.createServer((req, res) => {
 if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`End Plutocracy running at http://localhost:${PORT} (refreshing every ${REFRESH_MINUTES} min)`);
+    console.log(STRIPE_KEY ? 'Checkout: Stripe key found, checkout is on.' : 'Checkout: no STRIPE_SECRET_KEY set, the Buy button will say checkout is not set up yet.');
     refresh().catch((e) => console.error('Initial refresh failed:', e));
     setInterval(() => refresh().catch((e) => console.error('Refresh failed:', e)), REFRESH_MINUTES * 60 * 1000);
   });
