@@ -38,6 +38,7 @@
   .topbar .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 24px; padding-top: 12px; padding-bottom: 12px; }
   .wordmark { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
   .wordmark b { color: inherit; font-weight: 800; }
+  .wordmark .pluto { width: 1.15em; height: 1.15em; margin-right: 0.45em; vertical-align: -0.2em; fill: none; stroke: var(--purple-pale); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .topbar nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .topbar nav a { font-family: var(--display); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
   .topbar nav a { white-space: nowrap; }
@@ -130,6 +131,8 @@
   .src { font-size: 0.78rem; color: var(--grey-dim); margin-top: 2px; }
   .summary { font-size: 0.88rem; color: var(--grey-dim); margin-top: 4px; }
   .notice { color: var(--grey-dim); padding: 14px 18px; }
+  .chip.more { margin-top: 12px; padding: 7px 20px; }
+  .chip.more[hidden] { display: none; }
 
   /* Studies */
   ul.studies .topic { display: inline-block; font-family: var(--display); font-weight: 600; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-text); border: 1.5px solid var(--purple-dark); border-radius: 999px; padding: 1px 10px; margin-bottom: 6px; }
@@ -166,7 +169,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a class="wordmark" href="#top">End <b>Plutocracy</b></a>
+    <a class="wordmark" href="#top"><svg class="pluto" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="5.2" r="2.3"/><path d="M5.6 7.2 C5.6 12.6 8.4 14.6 12 14.6 C15.6 14.6 18.4 12.6 18.4 7.2"/><path d="M12 14.6 V22.4 M8 19 H16"/></svg>End <b>Plutocracy</b></a>
     <nav aria-label="Sections">
       <a href="#wealth">Wealth gap</a>
       <a href="#indicators">Indicators</a>
@@ -211,6 +214,7 @@
     <p class="sub">Inequality and economy news from linked publishers</p>
     <div class="chips" id="chips"></div>
     <ul class="news" id="news"></ul>
+    <button type="button" class="chip more" id="news-more" aria-controls="news" aria-expanded="false" hidden></button>
   </section>
 
   <section class="block" id="psychology" aria-labelledby="psy-h">
@@ -414,23 +418,34 @@ function timeAgo(iso) {
   return new Date(iso).toLocaleDateString();
 }
 
+const NEWS_VISIBLE = 10;
+let newsExpanded = false;
+
 function renderNews() {
   const sources = ['All', ...new Set(data.news.map((n) => n.source))];
   $('chips').innerHTML = sources.map((s) =>
     `<button class="chip" aria-pressed="${s === activeSource}" data-src="${esc(s)}">${esc(s)}</button>`).join('');
-  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('#chips .chip').forEach((b) => b.addEventListener('click', () => {
     activeSource = b.dataset.src;
+    newsExpanded = false;
     renderNews();
   }));
 
   const items = data.news.filter((n) => activeSource === 'All' || n.source === activeSource);
+  const shown = newsExpanded ? items : items.slice(0, NEWS_VISIBLE);
   $('news').innerHTML = items.length
-    ? items.map((n) => `<li>
+    ? shown.map((n) => `<li>
         <a href="${esc(safeUrl(n.link))}" target="_blank" rel="noopener">${esc(n.title)}</a>
         <div class="src">${esc(n.publisher || n.source)}${n.date ? ' · ' + timeAgo(n.date) : ''}</div>
         ${n.summary ? `<div class="summary">${esc(n.summary)}</div>` : ''}
       </li>`).join('')
     : '<li class="notice">No headlines available right now.</li>';
+
+  const more = items.length - NEWS_VISIBLE;
+  const btn = $('news-more');
+  btn.hidden = more <= 0;
+  btn.setAttribute('aria-expanded', String(newsExpanded));
+  btn.textContent = newsExpanded ? 'Show fewer headlines' : `Show ${more} more headline${more === 1 ? '' : 's'}`;
 }
 
 /* ---------- Merch + checkout ---------- */
@@ -512,6 +527,8 @@ function renderMerch() {
     paint();
   });
 }
+
+$('news-more').addEventListener('click', () => { newsExpanded = !newsExpanded; renderNews(); });
 
 /* ---------- Psychology: studies ---------- */
 // Each study links to its DOI. Add more entries here; "topic" feeds the filter buttons.
