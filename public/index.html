@@ -38,10 +38,10 @@
   .topbar .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 24px; padding-top: 12px; padding-bottom: 12px; }
   .wordmark { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
   .wordmark b { color: inherit; font-weight: 800; }
-  .topbar nav { display: flex; gap: 20px; }
+  .topbar nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .topbar nav a { font-family: var(--display); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); text-decoration: none; }
   .topbar nav a { white-space: nowrap; }
-  @media (max-width: 520px) { .topbar nav { gap: 14px; } .topbar nav a { font-size: 0.72rem; letter-spacing: 0.03em; } }
+  @media (max-width: 520px) { .topbar nav { gap: 6px 14px; } .topbar nav a { font-size: 0.72rem; letter-spacing: 0.03em; } }
   .topbar nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 5px; }
 
   /* Hero */
@@ -131,12 +131,16 @@
   .summary { font-size: 0.88rem; color: var(--grey-dim); margin-top: 4px; }
   .notice { color: var(--grey-dim); padding: 14px 18px; }
 
+  /* Studies */
+  ul.studies .topic { display: inline-block; font-family: var(--display); font-weight: 600; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-text); border: 1.5px solid var(--purple-dark); border-radius: 999px; padding: 1px 10px; margin-bottom: 6px; }
+  ul.studies .cite { font-size: 0.8rem; color: var(--grey-dim); margin-top: 2px; }
+
   /* Merch */
   .banner { border: 2px solid var(--purple); background: var(--purple-dark); color: #fff; border-radius: 16px; padding: 12px 18px; margin-bottom: 16px; font-weight: 600; }
   .shop { display: grid; grid-template-columns: minmax(200px, 320px) 1fr; gap: 28px; align-items: center; border: 2px solid var(--purple); border-radius: 28px; padding: 24px; }
   .shop .art { background: var(--bg-deep); border-radius: 18px; padding: 16px; }
-  .shop .art { display: flex; align-items: center; justify-content: center; }
-  .shop .art .sticker-img { display: block; width: 100%; max-width: 250px; height: auto; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45)); }
+  .shop .art { text-align: center; }
+  .shop .art .sticker-img { display: block; width: 100%; max-width: 250px; height: auto; aspect-ratio: 202 / 279; margin: 0 auto; }
   .shop h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey); }
   .shop .price { font-family: var(--display); font-weight: 800; font-size: 2.4rem; line-height: 1.2; color: var(--purple-pale); margin: 6px 0 0; }
   .shop .ship { font-size: 0.8rem; color: var(--grey-dim); }
@@ -151,7 +155,7 @@
   button.btn:disabled { opacity: 0.6; cursor: default; }
   .checkout-msg { min-height: 1.3em; margin: 10px 0 0; font-size: 0.88rem; color: #f2b8b8; }
   .checkout-note { margin: 4px 0 0; font-size: 0.78rem; color: var(--grey-dim); }
-  @media (max-width: 700px) { .shop { grid-template-columns: 1fr; padding: 18px; } .shop .art { max-width: 280px; margin: 0 auto; } }
+  @media (max-width: 700px) { .shop { grid-template-columns: 1fr; padding: 18px; } .shop .art { width: 100%; max-width: 320px; margin: 0 auto; padding: 20px 16px; } .shop .art .sticker-img { max-width: 260px; } }
 
   footer { margin: 44px 0 56px; padding-top: 24px; border-top: 2px solid var(--purple); text-align: center; }
   .badge { display: inline-block; border: 2px solid var(--purple); padding: 5px 16px; font-family: var(--display); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--grey); }
@@ -167,6 +171,7 @@
       <a href="#wealth">Wealth gap</a>
       <a href="#indicators">Indicators</a>
       <a href="#headlines">Headlines</a>
+      <a href="#psychology">Psychology</a>
       <a href="#merch">Merch</a>
     </nav>
   </div>
@@ -206,6 +211,14 @@
     <p class="sub">Inequality and economy news from linked publishers</p>
     <div class="chips" id="chips"></div>
     <ul class="news" id="news"></ul>
+  </section>
+
+  <section class="block" id="psychology" aria-labelledby="psy-h">
+    <h2 id="psy-h">The psychology of the gap</h2>
+    <p class="sub">Peer-reviewed studies on how wealth and inequality shape perception, behavior, thinking and well-being</p>
+    <div class="chips" id="psy-chips"></div>
+    <ul class="news studies" id="psy-list"></ul>
+    <p class="source">Each link goes to the published paper through its DOI. Research on social class and behavior is an active area of debate, and individual findings may be revised or hard to replicate, so read these as evidence, not settled fact.</p>
   </section>
 
   <section class="block" id="merch" aria-labelledby="merch-h">
@@ -499,6 +512,47 @@ function renderMerch() {
     paint();
   });
 }
+
+/* ---------- Psychology: studies ---------- */
+// Each study links to its DOI. Add more entries here; "topic" feeds the filter buttons.
+const STUDIES = [
+  { topic: 'Perception', title: 'Building a Better America: One Wealth Quintile at a Time',
+    cite: 'Michael I. Norton and Dan Ariely. Perspectives on Psychological Science, 2011',
+    doi: '10.1177/1745691610393524',
+    summary: 'Americans surveyed underestimated how unequal wealth in the United States actually is, and they said they wanted a more equal distribution than even their underestimate.' },
+  { topic: 'Behavior', title: 'Higher social class predicts increased unethical behavior',
+    cite: 'Paul K. Piff, Daniel M. Stancato, Stéphane Côté, Rodolfo Mendoza-Denton and Dacher Keltner. PNAS, 2012',
+    doi: '10.1073/pnas.1118373109',
+    summary: 'Across a series of studies, higher-class participants were more likely to break rules, take what was not theirs and lie in negotiations, with attitudes toward greed playing a part.' },
+  { topic: 'Thinking', title: 'Social class, solipsism, and contextualism: How the rich are different from the poor',
+    cite: 'Michael W. Kraus, Paul K. Piff, Rodolfo Mendoza-Denton, Michelle L. Rheinschmidt and Dacher Keltner. Psychological Review, 2012',
+    doi: '10.1037/a0028756',
+    summary: 'Lower-class individuals tend to explain events through outside forces and circumstances, while higher-class individuals lean toward explanations centered on the individual.' },
+  { topic: 'Thinking', title: 'Poverty Impedes Cognitive Function',
+    cite: 'Anandi Mani, Sendhil Mullainathan, Eldar Shafir and Jiaying Zhao. Science, 2013',
+    doi: '10.1126/science.1238041',
+    summary: 'Financial concerns took up mental bandwidth: when money worries were raised, performance on cognitive tasks dropped, in both laboratory and field settings.' },
+  { topic: 'Well-being', title: 'Income and emotional well-being: A conflict resolved',
+    cite: 'Matthew A. Killingsworth, Daniel Kahneman and Barbara Mellers. PNAS, 2023',
+    doi: '10.1073/pnas.2208661120',
+    summary: 'A joint study that reconciled two earlier findings: for most people, well-being keeps rising with income, while for a minority it levels off.' },
+];
+let psyTopic = 'All';
+function renderStudies() {
+  const topics = ['All', ...new Set(STUDIES.map((s) => s.topic))];
+  $('psy-chips').innerHTML = topics.map((t) =>
+    `<button type="button" class="chip" aria-pressed="${t === psyTopic}" data-topic="${esc(t)}">${esc(t)}</button>`).join('');
+  $('psy-list').innerHTML = STUDIES.filter((s) => psyTopic === 'All' || s.topic === psyTopic).map((s) => `
+    <li><span class="topic">${esc(s.topic)}</span><br>
+      <a href="https://doi.org/${esc(s.doi)}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>
+      <div class="cite">${esc(s.cite)}</div>
+      <div class="summary">${esc(s.summary)}</div></li>`).join('');
+}
+$('psy-chips').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-topic]');
+  if (b) { psyTopic = b.dataset.topic; renderStudies(); }
+});
+renderStudies();
 
 /* ---------- Loading ---------- */
 
